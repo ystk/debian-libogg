@@ -6,6 +6,6 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 doc_DATA = framing.html index.html oggstream.html ogg-multiplex.html \
 	stream.png vorbisword2.png white-ogg.png white-xifish.png \
-	skeleton.html
+	rfc3533.txt rfc5334.txt skeleton.html
 
 EXTRA_DIST = $(doc_DATA)

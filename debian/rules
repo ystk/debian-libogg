@@ -1,19 +1,37 @@
 #! /usr/bin/make -f
 
+export DH_OPTIONS
+
 NUM_CPUS = $(shell getconf _NPROCESSORS_ONLN 2>/dev/null)
 PARALLEL = $(subst parallel=,,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 NJOBS    = -j$(or $(PARALLEL),$(NUM_CPUS),1)
 
 
-export DH_OPTIONS
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+
+HARD_CPPFLAGS = -D_FORTIFY_SOURCE=2
+HARD_CFLAGS   = -Wformat=2
+HARD_LDFLAGS  = -z now
+
+ifneq (,$(filter-out $(DEB_HOST_ARCH), ia64 alpha mips mipsel hppa arm))
+	HARD_CFLAGS += -fstack-protector --param ssp-buffer-size=4
+endif
+ifneq (,$(filter-out $(DEB_HOST_ARCH), ia64 hppa avr32))
+	HARD_LDFLAGS += -z relro
+endif
 
 # Keep dpkg-buildpackage the hell out of messing with our compile flags,
 # we should trust upstream to know better than it what to use here.
-# We do append -g for release builds though, for the detached -dbg package.
-CPPFLAGS =
-CFLAGS   = -g
-CXXFLAGS = -g
-LDFLAGS  =
+# We do append -g for release builds though, for the detached -dbg package,
+# and also now the hardening flags too as appropriate.
+CPPFLAGS = $(HARD_CPPFLAGS)
+CFLAGS   = $(HARD_CFLAGS) -g
+CXXFLAGS = $(HARD_CFLAGS) -g
+LDFLAGS  = $(HARD_LDFLAGS)
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS = -Wall -g -O0
@@ -21,9 +39,6 @@ endif
 ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
-
-DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
 
 objdir = objs
@@ -42,10 +57,18 @@ $(objdir)/config.status: configure
 	mkdir -p $(objdir)
 	cd $(objdir) && ../configure --host=$(DEB_HOST_GNU_TYPE)	\
 				     --build=$(DEB_BUILD_GNU_TYPE)	\
+				     --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 				     --enable-static			\
-				     --prefix=/usr
+				     --prefix=/usr			\
+				     CPPFLAGS="$(CPPFLAGS)"		\
+				     CFLAGS="$(CFLAGS)"			\
+				     CXXFLAGS="$(CXXFLAGS)"		\
+				     LDFLAGS="$(LDFLAGS)"
 
-build: build-stamp
+build: build-arch
+build-arch: build-stamp
+build-indep:
+
 build-stamp: $(objdir)/config.status
 	dh_testdir
 	$(MAKE) $(NJOBS) -C $(objdir)
@@ -53,7 +76,7 @@ build-stamp: $(objdir)/config.status
 
 
 install: install-stamp
-install-stamp:
+install-stamp: build-arch
 	dh_testdir
 	$(MAKE) -C $(objdir) install DESTDIR=$(CURDIR)/debian/tmp
 	touch $@ 
@@ -62,7 +85,7 @@ install-stamp:
 binary: binary-arch
 
 binary-arch: DH_OPTIONS = -a
-binary-arch: build install
+binary-arch: install
 	dh_testdir
 	dh_testroot
 	dh_install --sourcedir=debian/tmp
@@ -71,7 +94,7 @@ binary-arch: build install
 	dh_strip --dbg-package=libogg-dbg
 	dh_compress
 	dh_fixperms
-	dh_makeshlibs -V -- -c4
+	dh_makeshlibs -V -- -c0
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
@@ -81,4 +104,4 @@ binary-arch: build install
 binary-indep:
 
 
-.PHONY: clean build install binary binary-arch binary-indep
+.PHONY: clean build build-arch build-indep install binary binary-arch binary-indep

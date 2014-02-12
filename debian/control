@@ -2,15 +2,17 @@ Source: libogg
 Section: libs
 Priority: optional
 Maintainer: Ron Lee <ron@debian.org>
-Build-Depends: debhelper(>=5)
-Standards-Version: 3.8.4.0
+Build-Depends: debhelper (>= 8.1.3)
+Standards-Version: 3.9.3.1
 Homepage: http://xiph.org/ogg/
 Vcs-Git: git://git.debian.org/users/ron/libogg.git
 Vcs-Browser: http://git.debian.org/?p=users/ron/libogg.git;a=summary
 
 Package: libogg0
 Architecture: any
+Multi-Arch: same
 Section: libs
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}
 Description: Ogg bitstream library
  Libogg is a library for manipulating ogg bitstreams.  It handles
@@ -18,6 +20,7 @@ Description: Ogg bitstream library
 
 Package: libogg-dev
 Architecture: any
+Multi-Arch: same
 Section: libdevel
 Depends: libogg0 (= ${binary:Version})
 Description: Ogg bitstream library development files
@@ -26,6 +29,7 @@ Description: Ogg bitstream library development files
 
 Package: libogg-dbg
 Architecture: any
+Multi-Arch: same
 Section: debug
 Priority: extra
 Depends: libogg0 (= ${binary:Version})

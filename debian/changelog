@@ -1,3 +1,42 @@
+libogg (1.3.0-4) unstable; urgency=low
+
+  * Tweak config_types.h to compensate for multi-arch insamity.
+    Closes: #675887
+
+ -- Ron Lee <ron@debian.org>  Sat, 09 Jun 2012 04:56:30 +0930
+
+libogg (1.3.0-3) unstable; urgency=low
+
+  * Build for multi-arch.  Closes: #637576
+
+ -- Ron Lee <ron@debian.org>  Sun, 03 Jun 2012 05:45:35 +0930
+
+libogg (1.3.0-2) unstable; urgency=low
+
+  * Build with 'hardening' flags enabled.  Closes: #673668
+
+ -- Ron Lee <ron@debian.org>  Tue, 22 May 2012 05:50:46 +0930
+
+libogg (1.3.0-1) unstable; urgency=low
+
+  * Adds ogg_stream_flush_fill().
+  * Restore the RFCs to the package.  We've always had permission for RFC 5334,
+    it's stated explicitly in Section 12 of the text.  We apparently also had
+    previously been given permission for RFC 3533 too - but somehow the record
+    of that had been lost.  We have an explicit grant from Silvia noted in the
+    copyright file now.  Reading and asking trumps over-zealotry.
+  * Add build-arch and build-indep targets to debian/rules.
+
+ -- Ron Lee <ron@debian.org>  Sun, 20 May 2012 23:34:05 +0930
+
+libogg (1.2.2~dfsg-1) unstable; urgency=low
+
+  * Adds ogg_stream_pageout_fill().
+  * Fixes for large packets on 32bit systems.
+  * More documentation updates.
+
+ -- Ron Lee <ron@debian.org>  Sun, 08 May 2011 04:06:51 +0930
+
 libogg (1.2.0~dfsg-1) unstable; urgency=low
 
   * Alter default flushing behavior to span less often and use larger page

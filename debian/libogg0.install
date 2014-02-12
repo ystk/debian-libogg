@@ -1,1 +1,1 @@
-usr/lib/libogg.so.*
+usr/lib/*/libogg.so.*
